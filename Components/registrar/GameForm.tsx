@@ -40,6 +40,13 @@ export default function GameForm({ jogadores, onSubmit, isSubmitting }) {
     setPerdedor2("");
   };
 
+  const getAvailableJogadores = (currentFieldValue) => {
+    const selectedIds = [vencedor1, vencedor2, perdedor1, perdedor2];
+    return jogadores.filter(
+      j => !selectedIds.includes(j.id) || j.id === currentFieldValue
+    );
+  };
+
   return (
     <Card className="border-none shadow-xl bg-white">
       <CardHeader className="border-b bg-gradient-to-r from-[#1a4d2e] to-[#2d5a3d] text-white rounded-t-lg">
@@ -65,7 +72,7 @@ export default function GameForm({ jogadores, onSubmit, isSubmitting }) {
                     <SelectValue placeholder="Selecione o jogador" />
                   </SelectTrigger>
                   <SelectContent>
-                    {jogadores.map((jogador) => (
+                    {getAvailableJogadores(vencedor1).map((jogador) => (
                       <SelectItem key={jogador.id} value={jogador.id}>
                         {jogador.nome}
                       </SelectItem>
@@ -83,7 +90,7 @@ export default function GameForm({ jogadores, onSubmit, isSubmitting }) {
                     <SelectValue placeholder="Selecione o jogador" />
                   </SelectTrigger>
                   <SelectContent>
-                    {jogadores.map((jogador) => (
+                    {getAvailableJogadores(vencedor2).map((jogador) => (
                       <SelectItem key={jogador.id} value={jogador.id}>
                         {jogador.nome}
                       </SelectItem>
@@ -109,7 +116,7 @@ export default function GameForm({ jogadores, onSubmit, isSubmitting }) {
                     <SelectValue placeholder="Selecione o jogador" />
                   </SelectTrigger>
                   <SelectContent>
-                    {jogadores.map((jogador) => (
+                    {getAvailableJogadores(perdedor1).map((jogador) => (
                       <SelectItem key={jogador.id} value={jogador.id}>
                         {jogador.nome}
                       </SelectItem>
@@ -127,7 +134,7 @@ export default function GameForm({ jogadores, onSubmit, isSubmitting }) {
                     <SelectValue placeholder="Selecione o jogador" />
                   </SelectTrigger>
                   <SelectContent>
-                    {jogadores.map((jogador) => (
+                    {getAvailableJogadores(perdedor2).map((jogador) => (
                       <SelectItem key={jogador.id} value={jogador.id}>
                         {jogador.nome}
                       </SelectItem>
