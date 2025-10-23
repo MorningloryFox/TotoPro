@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Trophy, Users, FileText, Target, Trash2 } from "lucide-react";
+import { Trophy, Users, FileText, Target, Trash2, Menu } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -76,20 +76,28 @@ export default function Layout({ children, currentPageName }) {
           --danger: #dc2626;
         }
         
-        /* Garantir que os textos do menu fiquem sempre visíveis */
-        [data-sidebar] a,
-        [data-sidebar] button {
-          color: white !important;
+        /* Garantir fundo verde escuro na sidebar */
+        .sidebar-custom,
+        .sidebar-custom > *,
+        [data-sidebar="sidebar"] {
+          background: linear-gradient(to bottom, #1a4d2e, #2d5a3d) !important;
+          color: #ffffff !important;
         }
         
-        [data-sidebar] a:hover,
-        [data-sidebar] button:hover {
-          background-color: rgba(255, 255, 255, 0.1) !important;
+        /* Remover qualquer fundo branco que possa estar sendo aplicado */
+        .sidebar-custom * {
+          background-color: transparent !important;
+        }
+        
+        .sidebar-custom [data-sidebar="header"],
+        .sidebar-custom [data-sidebar="content"],
+        .sidebar-custom [data-sidebar="group"] {
+          background-color: transparent !important;
         }
       `}</style>
       
       <div className="min-h-screen flex w-full bg-gradient-to-br from-gray-50 to-gray-100">
-        <Sidebar className="border-r border-gray-200 bg-gradient-to-b from-[#1a4d2e] to-[#2d5a3d]">
+        <Sidebar className="sidebar-custom border-r border-gray-200 bg-gradient-to-b from-[#1a4d2e] to-[#2d5a3d] text-white">
           <SidebarHeader className="border-b border-white/10 p-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-[#d4af37] rounded-xl flex items-center justify-center shadow-lg">
@@ -104,7 +112,7 @@ export default function Layout({ children, currentPageName }) {
           
           <SidebarContent className="p-3">
             <SidebarGroup>
-              <div className="text-xs font-semibold text-white/70 uppercase tracking-wider px-3 py-2 mb-1">
+              <div className="text-xs font-semibold text-white/60 uppercase tracking-wider px-3 py-2 mb-1">
                 Público
               </div>
               <SidebarGroupContent>
@@ -114,8 +122,10 @@ export default function Layout({ children, currentPageName }) {
                       <SidebarMenuButton asChild>
                         <Link 
                           to={item.url} 
-                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 text-white hover:bg-white/10 ${
-                            location.pathname === item.url ? 'bg-white/20 shadow-md font-semibold' : ''
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 ${
+                            location.pathname === item.url 
+                              ? 'text-white font-semibold bg-white/20 shadow-md' 
+                              : 'text-white/80 hover:text-white hover:bg-white/10'
                           }`}
                         >
                           <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -130,7 +140,7 @@ export default function Layout({ children, currentPageName }) {
 
             {isAdmin && (
               <SidebarGroup className="mt-4">
-                <div className="text-xs font-semibold text-white/70 uppercase tracking-wider px-3 py-2 mb-1">
+                <div className="text-xs font-semibold text-white/60 uppercase tracking-wider px-3 py-2 mb-1">
                   Administração
                 </div>
                 <SidebarGroupContent>
@@ -140,8 +150,10 @@ export default function Layout({ children, currentPageName }) {
                         <SidebarMenuButton asChild>
                           <Link 
                             to={item.url} 
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 text-white hover:bg-white/10 ${
-                              location.pathname === item.url ? 'bg-white/20 shadow-md font-semibold' : ''
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 ${
+                              location.pathname === item.url 
+                                ? 'text-white font-semibold bg-white/20 shadow-md' 
+                                : 'text-white/80 hover:text-white hover:bg-white/10'
                             }`}
                           >
                             <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -160,8 +172,10 @@ export default function Layout({ children, currentPageName }) {
         <main className="flex-1 flex flex-col">
           <header className="bg-white border-b border-gray-200 px-6 py-4 md:hidden">
             <div className="flex items-center gap-4">
-              <SidebarTrigger className="hover:bg-gray-100 p-2 rounded-lg transition-colors duration-200" />
-              <h1 className="text-xl font-bold">Tótó Pro</h1>
+              <SidebarTrigger className="w-12 h-12 flex items-center justify-center p-3.5 hover:bg-gray-100 rounded-lg transition-colors duration-200 border border-gray-300">
+                <Menu className="w-6 h-6 text-gray-700" />
+              </SidebarTrigger>
+              <h1 className="text-xl font-bold text-gray-900">Tótó Pro</h1>
             </div>
           </header>
 
