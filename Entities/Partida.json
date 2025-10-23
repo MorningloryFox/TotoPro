@@ -1,0 +1,28 @@
+{
+  "name": "Partida",
+  "type": "object",
+  "properties": {
+    "vencedor_1": {
+      "type": "string",
+      "description": "ID do primeiro jogador vencedor"
+    },
+    "vencedor_2": {
+      "type": "string",
+      "description": "ID do segundo jogador vencedor"
+    },
+    "perdedor_1": {
+      "type": "string",
+      "description": "ID do primeiro jogador perdedor"
+    },
+    "perdedor_2": {
+      "type": "string",
+      "description": "ID do segundo jogador perdedor"
+    }
+  },
+  "required": [
+    "vencedor_1",
+    "vencedor_2",
+    "perdedor_1",
+    "perdedor_2"
+  ]
+}
