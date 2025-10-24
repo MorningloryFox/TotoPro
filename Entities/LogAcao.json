@@ -4,15 +4,15 @@
   "properties": {
     "userEmail": {
       "type": "string",
-      "description": "E-mail do usuário que realizou a ação"
+      "description": "E-mail do usu\u00e1rio que realizou a a\u00e7\u00e3o"
     },
     "action": {
       "type": "string",
-      "description": "Tipo da ação (ex: 'REGISTRO_JOGO', 'DELETE_JOGADOR')"
+      "description": "Tipo da a\u00e7\u00e3o (ex: 'REGISTRO_JOGO', 'DELETE_JOGADOR')"
     },
     "details": {
       "type": "string",
-      "description": "Detalhes da ação (ex: 'Jogador: Fulano')"
+      "description": "Detalhes da a\u00e7\u00e3o (ex: 'Jogador: Fulano')"
     }
   },
   "required": [
