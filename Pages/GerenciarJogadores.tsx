@@ -1,3 +1,4 @@
+
 import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,29 +10,20 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ShieldAlert, Plus, Trash2, Users, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth, logAction } from "@/components/hooks/useAuth"; // Corrected import path
 
 export default function GerenciarJogadoresPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [user, setUser] = React.useState(null);
   const [novoNome, setNovoNome] = React.useState("");
   const [showSuccess, setShowSuccess] = React.useState(false);
 
+  const { user, permissions, isLoading: isLoadingAuth } = useAuth();
   React.useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-        
-        if (currentUser.role !== 'admin') {
-          navigate(createPageUrl("Placar"));
-        }
-      } catch (error) {
-        navigate(createPageUrl("Placar"));
-      }
-    };
-    loadUser();
-  }, [navigate]);
+    if (!isLoadingAuth && !permissions.canManagePlayers) {
+      navigate(createPageUrl("Placar"));
+    }
+  }, [isLoadingAuth, permissions.canManagePlayers, navigate]);
 
   const { data: jogadores, isLoading } = useQuery({
     queryKey: ['jogadores'],
@@ -41,18 +33,20 @@ export default function GerenciarJogadoresPage() {
 
   const createJogadorMutation = useMutation({
     mutationFn: (nome) => base44.entities.Jogador.create({ nome }),
-    onSuccess: () => {
+    onSuccess: (data, nome) => {
       queryClient.invalidateQueries({ queryKey: ['jogadores'] });
       setNovoNome("");
       setShowSuccess(true);
+      logAction(user, "CREATE_JOGADOR", `Nome: ${nome}`);
       setTimeout(() => setShowSuccess(false), 2000);
     },
   });
 
   const deleteJogadorMutation = useMutation({
-    mutationFn: (id) => base44.entities.Jogador.delete(id),
-    onSuccess: () => {
+    mutationFn: (jogador) => base44.entities.Jogador.delete(jogador.id),
+    onSuccess: (data, jogador) => {
       queryClient.invalidateQueries({ queryKey: ['jogadores'] });
+      logAction(user, "DELETE_JOGADOR", `Nome: ${jogador.nome}, ID: ${jogador.id}`);
     },
   });
 
@@ -63,17 +57,8 @@ export default function GerenciarJogadoresPage() {
     }
   };
 
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-        <Alert variant="destructive" className="max-w-md">
-          <ShieldAlert className="h-4 w-4" />
-          <AlertDescription>
-            Acesso negado. Esta página é apenas para administradores.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
+  if (isLoadingAuth || !permissions.canManagePlayers) {
+    return <div className="min-h-screen p-4"></div>;
   }
 
   return (
@@ -161,7 +146,7 @@ export default function GerenciarJogadoresPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => deleteJogadorMutation.mutate(jogador.id)}
+                        onClick={() => deleteJogadorMutation.mutate(jogador)}
                         disabled={deleteJogadorMutation.isPending}
                         className="hover:bg-red-50 hover:text-red-600 transition-colors"
                       >
