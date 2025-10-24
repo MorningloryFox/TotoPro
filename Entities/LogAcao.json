@@ -1,0 +1,22 @@
+{
+  "name": "LogAcao",
+  "type": "object",
+  "properties": {
+    "userEmail": {
+      "type": "string",
+      "description": "E-mail do usuário que realizou a ação"
+    },
+    "action": {
+      "type": "string",
+      "description": "Tipo da ação (ex: 'REGISTRO_JOGO', 'DELETE_JOGADOR')"
+    },
+    "details": {
+      "type": "string",
+      "description": "Detalhes da ação (ex: 'Jogador: Fulano')"
+    }
+  },
+  "required": [
+    "userEmail",
+    "action"
+  ]
+}
