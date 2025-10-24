@@ -1,3 +1,4 @@
+
 import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,29 +19,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useAuth, logAction } from "@/components/hooks/useAuth";
 
 export default function LimparDadosPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [user, setUser] = React.useState(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [showSuccess, setShowSuccess] = React.useState(false);
 
+  const { user, permissions, isLoading: isLoadingAuth } = useAuth();
   React.useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-        
-        if (currentUser.role !== 'admin') {
-          navigate(createPageUrl("Placar"));
-        }
-      } catch (error) {
-        navigate(createPageUrl("Placar"));
-      }
-    };
-    loadUser();
-  }, [navigate]);
+    // Redirect if authentication is loaded and user does not have permission
+    if (!isLoadingAuth && !permissions.canClearData) {
+      navigate(createPageUrl("Placar"));
+    }
+  }, [isLoadingAuth, permissions.canClearData, navigate]);
 
   const { data: partidas } = useQuery({
     queryKey: ['partidas'],
@@ -62,6 +55,7 @@ export default function LimparDadosPage() {
       }
       queryClient.invalidateQueries({ queryKey: ['partidas'] });
       setShowSuccess(true);
+      logAction(user, "LIMPAR_DADOS", `Partidas deletadas: ${partidas.length}`);
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
       console.error("Erro ao deletar partidas:", error);
@@ -77,6 +71,7 @@ export default function LimparDadosPage() {
       }
       queryClient.invalidateQueries({ queryKey: ['jogadores'] });
       setShowSuccess(true);
+      logAction(user, "LIMPAR_DADOS", `Jogadores deletados: ${jogadores.length}`);
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
       console.error("Erro ao deletar jogadores:", error);
@@ -96,6 +91,7 @@ export default function LimparDadosPage() {
       queryClient.invalidateQueries({ queryKey: ['partidas'] });
       queryClient.invalidateQueries({ queryKey: ['jogadores'] });
       setShowSuccess(true);
+      logAction(user, "RESET_TOTAL", `Partidas: ${partidas.length}, Jogadores: ${jogadores.length}`);
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
       console.error("Erro ao deletar dados:", error);
@@ -103,17 +99,10 @@ export default function LimparDadosPage() {
     setIsDeleting(false);
   };
 
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-        <Alert variant="destructive" className="max-w-md">
-          <ShieldAlert className="h-4 w-4" />
-          <AlertDescription>
-            Acesso negado. Esta página é apenas para administradores.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
+  // While authentication is loading or if user doesn't have permission, render an empty div.
+  // The useEffect above will handle redirection if permission is denied.
+  if (isLoadingAuth || !permissions.canClearData) {
+    return <div className="min-h-screen p-4"></div>;
   }
 
   return (
