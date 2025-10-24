@@ -4,7 +4,7 @@
   "properties": {
     "email": {
       "type": "string",
-      "description": "E-mail do usuário (deve ser único)"
+      "description": "E-mail do usu\u00e1rio (deve ser \u00fanico)"
     },
     "canRegisterGame": {
       "type": "boolean",
