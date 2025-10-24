@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Trophy, Users, FileText, Target, Trash2, Menu } from "lucide-react";
+import { Trophy, Users, FileText, Target, Trash2, Menu, UserCog, History } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -14,25 +14,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/components/hooks/useAuth";
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
-  const [user, setUser] = React.useState(null);
-
-  React.useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-      } catch (error) {
-        setUser(null);
-      }
-    };
-    loadUser();
-  }, []);
-
-  const isAdmin = user?.role === 'admin';
+  const { user, permissions, isAdmin, isLoading } = useAuth();
 
   const publicPages = [
     {
@@ -52,18 +38,35 @@ export default function Layout({ children, currentPageName }) {
       title: "Registrar Jogo",
       url: createPageUrl("RegistrarJogo"),
       icon: Target,
+      show: () => permissions.canRegisterGame,
     },
     {
       title: "Gerenciar Jogadores",
       url: createPageUrl("GerenciarJogadores"),
       icon: Users,
+      show: () => permissions.canManagePlayers,
+    },
+    {
+      title: "Gerenciar Permissões",
+      url: createPageUrl("GerenciarAutorizacoes"),
+      icon: UserCog,
+      show: () => isAdmin,
     },
     {
       title: "Limpar Dados",
       url: createPageUrl("LimparDados"),
       icon: Trash2,
+      show: () => permissions.canClearData,
+    },
+    {
+      title: "Ver Logs",
+      url: createPageUrl("VerLogs"),
+      icon: History,
+      show: () => isAdmin,
     },
   ];
+
+  const visibleAdminPages = adminPages.filter(page => page.show());
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -76,7 +79,6 @@ export default function Layout({ children, currentPageName }) {
           --danger: #dc2626;
         }
         
-        /* Garantir fundo verde escuro na sidebar */
         .sidebar-custom,
         .sidebar-custom > *,
         [data-sidebar="sidebar"] {
@@ -84,7 +86,6 @@ export default function Layout({ children, currentPageName }) {
           color: #ffffff !important;
         }
         
-        /* Remover qualquer fundo branco que possa estar sendo aplicado */
         .sidebar-custom * {
           background-color: transparent !important;
         }
@@ -138,14 +139,14 @@ export default function Layout({ children, currentPageName }) {
               </SidebarGroupContent>
             </SidebarGroup>
 
-            {isAdmin && (
+            {!isLoading && visibleAdminPages.length > 0 && (
               <SidebarGroup className="mt-4">
                 <div className="text-xs font-semibold text-white/60 uppercase tracking-wider px-3 py-2 mb-1">
                   Administração
                 </div>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {adminPages.map((item) => (
+                    {visibleAdminPages.map((item) => (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild>
                           <Link 
