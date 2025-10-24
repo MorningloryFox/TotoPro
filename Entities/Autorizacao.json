@@ -1,0 +1,28 @@
+{
+  "name": "Autorizacao",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "E-mail do usuário (deve ser único)"
+    },
+    "canRegisterGame": {
+      "type": "boolean",
+      "description": "Pode registrar jogos?",
+      "default": false
+    },
+    "canManagePlayers": {
+      "type": "boolean",
+      "description": "Pode gerenciar jogadores?",
+      "default": false
+    },
+    "canClearData": {
+      "type": "boolean",
+      "description": "Pode limpar dados?",
+      "default": false
+    }
+  },
+  "required": [
+    "email"
+  ]
+}
