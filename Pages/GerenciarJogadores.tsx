@@ -134,7 +134,7 @@ export default function GerenciarJogadoresPage() {
                       key={jogador.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
+                      exit={{ opacity: 0, x: 20 }
                       className="flex items-center justify-between p-4 bg-white border-2 border-gray-200 rounded-xl hover:shadow-md transition-all duration-200"
                     >
                       <div className="flex items-center gap-3">
