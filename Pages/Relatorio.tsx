@@ -2,12 +2,14 @@ import React, { useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Copy, CheckCircle2 } from "lucide-react";
+import { FileText, Copy, CheckCircle2, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function RelatorioPage() {
   const [copied, setCopied] = React.useState(false);
+  const [filtro, setFiltro] = React.useState("hoje");
 
   const { data: jogadores, isLoading: loadingJogadores } = useQuery({
     queryKey: ['jogadores'],
@@ -21,15 +23,40 @@ export default function RelatorioPage() {
     initialData: [],
   });
 
+  const getFilteredPartidas = () => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    return partidas.filter(p => {
+      const partidaDate = new Date(p.created_date);
+      
+      if (filtro === "hoje") {
+        return partidaDate >= today;
+      } else if (filtro === "7dias") {
+        const weekAgo = new Date(today);
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return partidaDate >= weekAgo;
+      } else if (filtro === "30dias") {
+        const monthAgo = new Date(today);
+        monthAgo.setDate(monthAgo.getDate() - 30);
+        return partidaDate >= monthAgo;
+      }
+      return true;
+    });
+  };
+
   const relatorio = useMemo(() => {
-    if (!jogadores.length || !partidas.length) return "";
+    if (!jogadores.length) return "";
+
+    const partidasFiltradas = getFilteredPartidas();
+    if (!partidasFiltradas.length) return "";
 
     const stats = jogadores.map(jogador => {
-      const vitorias = partidas.filter(p => 
+      const vitorias = partidasFiltradas.filter(p => 
         p.vencedor_1 === jogador.id || p.vencedor_2 === jogador.id
       ).length;
 
-      const derrotas = partidas.filter(p => 
+      const derrotas = partidasFiltradas.filter(p => 
         p.perdedor_1 === jogador.id || p.perdedor_2 === jogador.id
       ).length;
 
@@ -51,7 +78,7 @@ export default function RelatorioPage() {
       .map(s => `Nome: ${s.nome} | ${s.vitorias} V | ${s.derrotas} D`);
 
     return linhas.join('\n');
-  }, [jogadores, partidas]);
+  }, [jogadores, partidas, filtro]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(relatorio);
@@ -60,6 +87,13 @@ export default function RelatorioPage() {
   };
 
   const isLoading = loadingJogadores || loadingPartidas;
+
+  const getFiltroLabel = () => {
+    if (filtro === "hoje") return "Hoje";
+    if (filtro === "7dias") return "Últimos 7 dias";
+    if (filtro === "30dias") return "Últimos 30 dias";
+    return "Todos";
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-green-50/30 to-gray-50 p-4 md:p-8">
@@ -74,10 +108,31 @@ export default function RelatorioPage() {
           </p>
         </div>
 
+        <Card className="shadow-xl mb-6">
+          <CardHeader className="bg-gray-50 border-b">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Filtrar por Período
+              </CardTitle>
+              <Select value={filtro} onValueChange={setFiltro}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Selecione o período" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hoje">Hoje</SelectItem>
+                  <SelectItem value="7dias">Últimos 7 dias</SelectItem>
+                  <SelectItem value="30dias">Últimos 30 dias</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardHeader>
+        </Card>
+
         <Card className="shadow-2xl border-none">
           <CardHeader className="bg-gradient-to-r from-[#1a4d2e] to-[#2d5a3d] text-white rounded-t-xl">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-2xl">Estatísticas Gerais</CardTitle>
+              <CardTitle className="text-2xl">Estatísticas - {getFiltroLabel()}</CardTitle>
               <Button
                 variant="secondary"
                 size="sm"
@@ -113,8 +168,8 @@ export default function RelatorioPage() {
             ) : (
               <div className="text-center py-12 text-gray-500">
                 <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <p className="text-lg">Nenhuma partida registrada ainda</p>
-                <p className="text-sm mt-2">O relatório aparecerá após as primeiras partidas</p>
+                <p className="text-lg">Nenhuma partida registrada no período selecionado</p>
+                <p className="text-sm mt-2">Tente selecionar outro período</p>
               </div>
             )}
           </CardContent>
