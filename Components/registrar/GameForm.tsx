@@ -1,15 +1,16 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Target, Users, CheckCircle2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Target, Users, CheckCircle2, Search } from "lucide-react";
 
 export default function GameForm({ jogadores, onSubmit, isSubmitting }) {
   const [vencedor1, setVencedor1] = React.useState("");
   const [vencedor2, setVencedor2] = React.useState("");
   const [perdedor1, setPerdedor1] = React.useState("");
   const [perdedor2, setPerdedor2] = React.useState("");
+  const [buscaVencedores, setBuscaVencedores] = React.useState("");
+  const [buscaPerdedores, setBuscaPerdedores] = React.useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -38,14 +39,48 @@ export default function GameForm({ jogadores, onSubmit, isSubmitting }) {
     setVencedor2("");
     setPerdedor1("");
     setPerdedor2("");
+    setBuscaVencedores("");
+    setBuscaPerdedores("");
   };
 
-  const getAvailableJogadores = (currentFieldValue) => {
+  const getAvailableJogadores = (currentFieldValue, busca) => {
     const selectedIds = [vencedor1, vencedor2, perdedor1, perdedor2];
-    return jogadores.filter(
-      j => !selectedIds.includes(j.id) || j.id === currentFieldValue
-    );
+    return jogadores
+      .filter(j => !selectedIds.includes(j.id) || j.id === currentFieldValue)
+      .filter(j => j.nome.toLowerCase().includes(busca.toLowerCase()))
+      .sort((a, b) => a.nome.localeCompare(b.nome));
   };
+
+  const PlayerButton = ({ jogador, isSelected, onClick, color }) => (
+    <button
+      type="button"
+      onClick={() => onClick(jogador.id)}
+      className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+        isSelected
+          ? color === 'green' 
+            ? 'bg-green-600 border-green-700 text-white shadow-lg scale-105'
+            : 'bg-red-600 border-red-700 text-white shadow-lg scale-105'
+          : color === 'green'
+            ? 'bg-white border-green-300 hover:border-green-500 hover:bg-green-50'
+            : 'bg-white border-red-300 hover:border-red-500 hover:bg-red-50'
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+          isSelected
+            ? 'bg-white/20'
+            : color === 'green' 
+              ? 'bg-green-100 text-green-700'
+              : 'bg-red-100 text-red-700'
+        }`}>
+          {jogador.nome[0].toUpperCase()}
+        </div>
+        <span className={`font-medium text-base ${isSelected ? '' : 'text-gray-800'}`}>
+          {jogador.nome}
+        </span>
+      </div>
+    </button>
+  );
 
   return (
     <Card className="border-none shadow-xl bg-white">
@@ -62,41 +97,49 @@ export default function GameForm({ jogadores, onSubmit, isSubmitting }) {
               <CheckCircle2 className="w-6 h-6 text-green-600" />
               <h3 className="font-bold text-lg text-green-800">Time Vencedor</h3>
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="vencedor1" className="text-green-900 font-medium">
-                  Jogador 1
-                </Label>
-                <Select value={vencedor1} onValueChange={setVencedor1}>
-                  <SelectTrigger id="vencedor1" className="bg-white border-green-300">
-                    <SelectValue placeholder="Selecione o jogador" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getAvailableJogadores(vencedor1).map((jogador) => (
-                      <SelectItem key={jogador.id} value={jogador.id}>
-                        {jogador.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Buscar jogador..."
+                  value={buscaVencedores}
+                  onChange={(e) => setBuscaVencedores(e.target.value)}
+                  className="pl-10 bg-white border-green-300 h-12"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <p className="text-sm font-medium text-green-900 mb-2">Jogador 1</p>
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+                  {getAvailableJogadores(vencedor1, buscaVencedores).map((jogador) => (
+                    <PlayerButton
+                      key={jogador.id}
+                      jogador={jogador}
+                      isSelected={vencedor1 === jogador.id}
+                      onClick={setVencedor1}
+                      color="green"
+                    />
+                  ))}
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="vencedor2" className="text-green-900 font-medium">
-                  Jogador 2
-                </Label>
-                <Select value={vencedor2} onValueChange={setVencedor2}>
-                  <SelectTrigger id="vencedor2" className="bg-white border-green-300">
-                    <SelectValue placeholder="Selecione o jogador" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getAvailableJogadores(vencedor2).map((jogador) => (
-                      <SelectItem key={jogador.id} value={jogador.id}>
-                        {jogador.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div>
+                <p className="text-sm font-medium text-green-900 mb-2">Jogador 2</p>
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+                  {getAvailableJogadores(vencedor2, buscaVencedores).map((jogador) => (
+                    <PlayerButton
+                      key={jogador.id}
+                      jogador={jogador}
+                      isSelected={vencedor2 === jogador.id}
+                      onClick={setVencedor2}
+                      color="green"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -106,41 +149,49 @@ export default function GameForm({ jogadores, onSubmit, isSubmitting }) {
               <Users className="w-6 h-6 text-red-600" />
               <h3 className="font-bold text-lg text-red-800">Time Perdedor</h3>
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="perdedor1" className="text-red-900 font-medium">
-                  Jogador 1
-                </Label>
-                <Select value={perdedor1} onValueChange={setPerdedor1}>
-                  <SelectTrigger id="perdedor1" className="bg-white border-red-300">
-                    <SelectValue placeholder="Selecione o jogador" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getAvailableJogadores(perdedor1).map((jogador) => (
-                      <SelectItem key={jogador.id} value={jogador.id}>
-                        {jogador.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Buscar jogador..."
+                  value={buscaPerdedores}
+                  onChange={(e) => setBuscaPerdedores(e.target.value)}
+                  className="pl-10 bg-white border-red-300 h-12"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <p className="text-sm font-medium text-red-900 mb-2">Jogador 1</p>
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+                  {getAvailableJogadores(perdedor1, buscaPerdedores).map((jogador) => (
+                    <PlayerButton
+                      key={jogador.id}
+                      jogador={jogador}
+                      isSelected={perdedor1 === jogador.id}
+                      onClick={setPerdedor1}
+                      color="red"
+                    />
+                  ))}
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="perdedor2" className="text-red-900 font-medium">
-                  Jogador 2
-                </Label>
-                <Select value={perdedor2} onValueChange={setPerdedor2}>
-                  <SelectTrigger id="perdedor2" className="bg-white border-red-300">
-                    <SelectValue placeholder="Selecione o jogador" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getAvailableJogadores(perdedor2).map((jogador) => (
-                      <SelectItem key={jogador.id} value={jogador.id}>
-                        {jogador.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div>
+                <p className="text-sm font-medium text-red-900 mb-2">Jogador 2</p>
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+                  {getAvailableJogadores(perdedor2, buscaPerdedores).map((jogador) => (
+                    <PlayerButton
+                      key={jogador.id}
+                      jogador={jogador}
+                      isSelected={perdedor2 === jogador.id}
+                      onClick={setPerdedor2}
+                      color="red"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -148,7 +199,7 @@ export default function GameForm({ jogadores, onSubmit, isSubmitting }) {
           <Button 
             type="submit" 
             className="w-full h-14 text-lg bg-gradient-to-r from-[#1a4d2e] to-[#2d5a3d] hover:from-[#2d5a3d] hover:to-[#1a4d2e] shadow-lg"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !vencedor1 || !vencedor2 || !perdedor1 || !perdedor2}
           >
             {isSubmitting ? "Registrando..." : "Registrar Partida"}
           </Button>
