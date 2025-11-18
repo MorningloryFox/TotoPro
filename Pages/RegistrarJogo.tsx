@@ -1,4 +1,3 @@
-
 import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -38,7 +37,7 @@ export default function RegistrarJogoPage() {
       const v2 = getNome(variables.vencedor_2);
       const p1 = getNome(variables.perdedor_1);
       const p2 = getNome(variables.perdedor_2);
-      logAction(user, "REGISTRO_JOGO", `Venc: ${v1}, ${v2} | Perd: ${p1}, ${p2}`);
+      logAction(user, "REGISTRO_JOGO", `Venc: ${v1}, ${v2} | Perd: ${p1}, ${p2} | ID: ${data.id}`);
 
       setTimeout(() => setShowSuccess(false), 3000);
     },
