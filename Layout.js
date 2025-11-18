@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -31,6 +32,11 @@ export default function Layout({ children, currentPageName }) {
       url: createPageUrl("Relatorio"),
       icon: FileText,
     },
+    {
+      title: "Histórico de Ações",
+      url: createPageUrl("VerLogs"),
+      icon: History,
+    },
   ];
 
   const adminPages = [
@@ -57,12 +63,6 @@ export default function Layout({ children, currentPageName }) {
       url: createPageUrl("LimparDados"),
       icon: Trash2,
       show: () => permissions.canClearData,
-    },
-    {
-      title: "Ver Logs",
-      url: createPageUrl("VerLogs"),
-      icon: History,
-      show: () => isAdmin,
     },
   ];
 
